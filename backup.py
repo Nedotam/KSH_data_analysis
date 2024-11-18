@@ -4,7 +4,6 @@ import scipy
 import scipy.stats as stats
 import seaborn as sns
 import matplotlib.pyplot as plt
-import streamlit as st
 
 path="data/raw/"
 file="raw_data.csv"
@@ -20,23 +19,22 @@ except UnicodeDecodeError:
 except FileNotFoundError:
     print("A file nem talalhato a "+path+" mappaban")
 else:
-    st.table(df)
+    print(df)
     
-st.write(df.info())
-st.write("#Elso oszlopot, es sort kihagyva minden ,-t .-ra cserelek")
+df.info()
+#Elso oszlopot, es sort kihagyva minden ,-t .-ra cserelek
 df.iloc[:, 1:] = df.iloc[:, 1:].replace(",",".", regex=True).apply(pd.to_numeric, errors='coerce')
 
 
-st.write("#Amit nem tudok float-ta alakitani azt NaN-re valtom")
+#Amit nem tudok float-ta alakitani azt NaN-re valtom
 df.iloc[:, 1:] = df.iloc[:, 1:].apply(pd.to_numeric, errors='coerce')
 
 
-st.write("#A megnevezes oszlopnevet Ev-re cserelem")
 df=df.rename(columns={'Megnevezés': 'Év'})
 df=df.transpose()
 df.reset_index(inplace=True)
-st.table(df)
-st.write("Kimentem a megtisztitott adatot")
+print(df)
+
 out_path = "data/processed/"
 file_name = "clean_data.csv"
 file_out_path = out_path+file_name
@@ -48,7 +46,7 @@ except OSError:
 path='data/processed/'
 file='clean_data.csv'
 encode='latin-1'
-
+#A file elso sora folosleges, encoding hibat ad ki a program utf-8 encodolasra, es a csv ';'-el van elvalasztva.
 try:
     df=pd.read_csv(path+file, encoding=encode, delimiter=',')
     
@@ -62,7 +60,7 @@ else:
 
 
 
-st.write("#az osszehasonlitast kezdem az elso oszloppal, es azt osszehasonlitom az osszes tobbi oszloppal")
+#az osszehasonlitast kezdem az elso oszloppal, es azt osszehasonlitom az osszes tobbi oszloppal
 for outer in range(1, df.shape[1]):
     #onmagaval nem hasonlitom ossze, ezert a sorszam+1 tol inditom a belso ciklust // df.shape[1] megadja az oszlopok szamossagat
     for inner in range(outer+1, df.shape[1]):
@@ -71,8 +69,10 @@ for outer in range(1, df.shape[1]):
         #print(f)-el ki tudok valtozokat iratni
         print(f'A {df.columns[outer]} es {df.columns[inner]} osszefuggesi erossege: {relation}')
         
+print(df)
 
-st.write("#Legeneralom a linechartokat, majd kesobb kivalasztjuk hogy melyik relevans. Ez resze az EDA-nak (Exploratory Data Analysis). Lenyegeben megnezunk mindent, es probaljuk eszrevenni az osszefuggeseket.")
+
+
 for outer in range(1, df.shape[1]):  
     
     column_outer = df.iloc[:, [0, outer]]  # 'Év' es egy oszlop
@@ -90,21 +90,18 @@ for outer in range(1, df.shape[1]):
         plt.title(f"{df.columns[outer]} vs {df.columns[inner]}")
         plt.xlabel("Év")
         plt.ylabel("%")
-        st.write(plt.show())
+        plt.show()
         
-st.write("#az utolso evet eltavolitom, mert a NaN ertekek zavarjak a linearis regressziot")
-st.table(df)
+#az utolso evet eltavolitom, mert a NaN ertekek zavarjak a linearis regressziot
 linear_df=df.drop(axis=0, index=df.shape[0]-1)
-st.write("#feltoltottem a hianyzo adatot a kovetkezo evi adatbol")
+#feltoltottem a hianyzo adatot a kovetkezo evi adatbol
 linear_df.fillna(method='bfill')
-st.table(df)
 
 
-st.write("Most keresek linearis regressziot az adatok kozt.")
 for i in range(1, linear_df.shape[1]):
     res = stats.linregress(linear_df['Év'], linear_df.iloc[:, i])
-    st.write(f"R-negyzet a(z) {linear_df.columns[i]} hoz/hez : {res.rvalue**2:.6f}")
+    print(f"R-negyzet a(z) {linear_df.columns[i]} hoz/hez : {res.rvalue**2:.6f}")
 
 
 
-st.write("# Nem linearis a valtozas, erre lehetett is szamitani, mivel sok komponense lehet a piac alakulasanak.")
+# Nem linearis a valtozas, erre lehetett is szamitani, mivel sok komponense lehet a piac alakulasanak.
