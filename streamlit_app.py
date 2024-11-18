@@ -6,11 +6,15 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import streamlit as st
 
+st.set_page_config(layout="centered")
+
+st.write("KSH adat elemzese")
+
 path="data/raw/"
 file="raw_data.csv"
 encoding='latin-1'
 skiprows=1
-#A file elso sora folosleges, encoding hibat ad ki a program utf-8 encodolasra, es a csv ';'-el van elvalasztva.
+st.write("#A file elso sora folosleges, encoding hibat ad ki a program utf-8 encodolasra, es a csv ';'-el van elvalasztva.")
 try:
     
     df=pd.read_csv(path+file, encoding=encoding, delimiter=';', skiprows=skiprows )
@@ -22,7 +26,6 @@ except FileNotFoundError:
 else:
     st.table(df)
     
-st.write(df.info())
 st.write("#Elso oszlopot, es sort kihagyva minden ,-t .-ra cserelek")
 df.iloc[:, 1:] = df.iloc[:, 1:].replace(",",".", regex=True).apply(pd.to_numeric, errors='coerce')
 
@@ -72,7 +75,7 @@ for outer in range(1, df.shape[1]):
         print(f'A {df.columns[outer]} es {df.columns[inner]} osszefuggesi erossege: {relation}')
         
 
-st.write("#Legeneralom a linechartokat, majd kesobb kivalasztjuk hogy melyik relevans. Ez resze az EDA-nak (Exploratory Data Analysis). Lenyegeben megnezunk mindent, es probaljuk eszrevenni az osszefuggeseket.")
+st.write("#Legeneralom a linechartokat, majd kesobb kivalasztjuk hogy melyik relevans. Ez resze az EDA-nek (Exploratory Data Analysis). Lenyegeben megnezunk mindent, es probaljuk eszrevenni az osszefuggeseket.")
 for outer in range(1, df.shape[1]):  
     
     column_outer = df.iloc[:, [0, outer]]  # 'Év' es egy oszlop
@@ -80,7 +83,7 @@ for outer in range(1, df.shape[1]):
     for inner in range(outer + 1, df.shape[1]):
         
         column_inner = df.iloc[:, [0, inner]]  # 'Év' es egy masik oszlop
-
+        plt.figure(figsize=(8, 5))
         # elso oszlop plot
         sns.lineplot(x='Év', y=column_outer.columns[1], data=column_outer, label=df.columns[outer])
         
@@ -90,20 +93,28 @@ for outer in range(1, df.shape[1]):
         plt.title(f"{df.columns[outer]} vs {df.columns[inner]}")
         plt.xlabel("Év")
         plt.ylabel("%")
-        st.write(plt.show())
+        plt.legend()
+        st.pyplot(plt)
+        plt.clf()
         
 st.write("#az utolso evet eltavolitom, mert a NaN ertekek zavarjak a linearis regressziot")
+st.write("#feltoltottem a hianyzo adatot a kovetkezo evi adatbol")
+st.write("Elotte:")
 st.table(df)
 linear_df=df.drop(axis=0, index=df.shape[0]-1)
-st.write("#feltoltottem a hianyzo adatot a kovetkezo evi adatbol")
-linear_df.fillna(method='bfill')
-st.table(df)
+
+
+linear_df.bfill(inplace=True)
+
+st.write("Utana:")
+st.table(linear_df)
+linear_df.info()
 
 
 st.write("Most keresek linearis regressziot az adatok kozt.")
 for i in range(1, linear_df.shape[1]):
     res = stats.linregress(linear_df['Év'], linear_df.iloc[:, i])
-    st.write(f"R-negyzet a(z) {linear_df.columns[i]} hoz/hez : {res.rvalue**2:.6f}")
+    st.write(f"{linear_df.columns[i]} R^2: {res.rvalue**2:.6f}")
 
 
 
