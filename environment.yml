@@ -1,4 +1,4 @@
-name: DA
+name: KSH
 channels:
   - conda-forge
   - defaults
@@ -11,5 +11,5 @@ dependencies:
   - pandas==2.2.2
   - scipy==1.14.1
   - seaborn==0.13.2
-  - streamlit==1.40.1
+  - python==3.11.10
 

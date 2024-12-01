@@ -5,6 +5,7 @@ import scipy.stats as stats
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+
 path="data/raw/"
 file="raw_data.csv"
 encoding='latin-1'
@@ -67,12 +68,10 @@ for outer in range(1, df.shape[1]):
         #valtozoba teszem az osszehasonlitast
         relation=df.iloc[1:,outer].corr(df.iloc[1:,inner])
         #print(f)-el ki tudok valtozokat iratni
-        print(f'A {df.columns[outer]} es {df.columns[inner]} osszefuggesi erossege: {relation}')
+        print(f'A {df.columns[outer]} es {df.columns[inner]} \n osszefuggesi erossege: {relation:.6f}')
         
-print(df)
 
-
-
+#Grafikonepites
 for outer in range(1, df.shape[1]):  
     
     column_outer = df.iloc[:, [0, outer]]  # 'Év' es egy oszlop
@@ -95,7 +94,7 @@ for outer in range(1, df.shape[1]):
 #az utolso evet eltavolitom, mert a NaN ertekek zavarjak a linearis regressziot
 linear_df=df.drop(axis=0, index=df.shape[0]-1)
 #feltoltottem a hianyzo adatot a kovetkezo evi adatbol
-linear_df.fillna(method='bfill')
+linear_df.fillna(method='bfill', inplace=True)
 
 
 for i in range(1, linear_df.shape[1]):
@@ -104,4 +103,5 @@ for i in range(1, linear_df.shape[1]):
 
 
 
-# Nem linearis a valtozas, erre lehetett is szamitani, mivel sok komponense lehet a piac alakulasanak.
+print("Nem linearis a valtozas, erre lehetett is szamitani, mivel sok komponense lehet a piac alakulasanak.")
+print()
